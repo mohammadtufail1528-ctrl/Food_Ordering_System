@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}{{ food.name }} – Foodie{% endblock %}
+
+{% block content %}
+
+<section class="section-padding">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-danger">Home</a></li>
+        <li class="breadcrumb-item"><a href="/menu/" class="text-danger">Menu</a></li>
+        <li class="breadcrumb-item"><a href="/menu/?category={{ food.category.slug }}" class="text-danger">{{ food.category.name }}</a></li>
+        <li class="breadcrumb-item active">{{ food.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-5 align-items-start">
+
+      <!-- ── Food Image ───────────────────────────────────────── -->
+      <div class="col-lg-5">
+        <div class="detail-img-wrapper">
+          <img src="{{ food.get_image }}" alt="{{ food.name }}" class="detail-img"
+               onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80'" />
+
+          <!-- Floating badges -->
+          {% if food.is_bestseller %}
+          <div class="detail-badge bestseller">🔥 Bestseller</div>
+          {% endif %}
+          {% if food.discount_percent > 0 %}
+          <div class="detail-badge discount">{{ food.discount_percent }}% OFF</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── Food Details ─────────────────────────────────────── -->
+      <div class="col-lg-7">
+        <!-- Category & Veg indicator -->
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <span class="food-category-tag">{{ food.category.name }}</span>
+          <span class="veg-tag {{ food.is_veg|yesno:'veg,nonveg' }}">
+            {% if food.is_veg %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}
+          </span>
+          {% if food.is_new %}<span class="new-tag">✨ New</span>{% endif %}
+        </div>
+
+        <h1 class="detail-title">{{ food.name }}</h1>
+        <p class="detail-desc">{{ food.description }}</p>
+
+        <!-- Rating & Reviews -->
+        <div class="detail-rating d-flex align-items-center gap-3 mb-4">
+          <div class="stars-display">
+            {% for i in "12345" %}
+              {% if forloop.counter <= food.rating %}
+              <i class="bi bi-star-fill text-warning"></i>
+              {% else %}
+              <i class="bi bi-star text-warning"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span class="fw-semibold">{{ food.rating }}/5</span>
+          <span class="text-muted">({{ food.total_reviews }} reviews)</span>
+        </div>
+
+        <!-- Meta Info Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="meta-card">
+              <i class="bi bi-clock text-danger fs-5"></i>
+              <strong>{{ food.prep_time }} min</strong>
+              <small>Prep Time</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="meta-card">
+              <i class="bi bi-fire text-danger fs-5"></i>
+              <strong>{{ food.calories }} cal</strong>
+              <small>Calories</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="meta-card">
+              <i class="bi bi-people text-danger fs-5"></i>
+              <strong>{{ food.serving_size }}</strong>
+              <small>Serving</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spice Level -->
+        <div class="mb-4">
+          <label class="fw-semibold mb-2">Spice Level:</label>
+          <span class="spice-badge spice-{{ food.spice_level }}">{{ food.get_spice_level_display }}</span>
+        </div>
+
+        <!-- Price -->
+        <div class="detail-price-box mb-4">
+          <span class="detail-current-price">₹{{ food.display_price }}</span>
+          {% if food.discount_percent > 0 %}
+          <span class="detail-original-price">₹{{ food.price }}</span>
+          <span class="detail-savings">You save ₹{{ food.price|add:"-0"|floatformat:0 }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Delivery info -->
+        <div class="delivery-info-box mb-4">
+          <i class="bi bi-truck me-2 text-success"></i>
+          <strong>Free delivery</strong> on orders above ₹499 •
+          <i class="bi bi-clock ms-2 me-1 text-warning"></i>{{ food.prep_time }}–{{ food.prep_time|add:"10" }} min
+        </div>
+
+        <!-- Add to Cart Form with Quantity -->
+        <form action="/orders/add/{{ food.id }}/" method="post" class="add-to-cart-detail-form">
+          {% csrf_token %}
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="qty-control">
+              <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+              <input type="number" name="quantity" id="detailQty" value="1" min="1" max="10" class="qty-input" readonly />
+              <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+            <button type="submit" class="btn btn-danger btn-lg rounded-pill px-5 flex-grow-1">
+              <i class="bi bi-cart-plus me-2"></i>Add to Cart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Related Items ─────────────────────────────────────── -->
+    {% if related_items %}
+    <div class="mt-6">
+      <h3 class="fw-bold mb-4">You Might Also Like</h3>
+      <div class="row g-4">
+        {% for item in related_items %}
+        <div class="col-sm-6 col-lg-3">
+          {% include 'partials/food_card.html' with food=item %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('detailQty');
+  let val = parseInt(input.value) + delta;
+  if (val < 1) val = 1;
+  if (val > 10) val = 10;
+  input.value = val;
+}
+</script>
+{% endblock %}

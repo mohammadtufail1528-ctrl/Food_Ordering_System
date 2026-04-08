@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}Checkout – Foodie{% endblock %}
+
+{% block content %}
+
+<section class="section-padding">
+  <div class="container">
+
+    <div class="page-header-simple mb-5">
+      <h2 class="fw-bold">Checkout</h2>
+      <p class="text-muted">Just a few details and your food is on its way!</p>
+    </div>
+
+    <form action="/orders/checkout/" method="post" id="checkoutForm" novalidate>
+      {% csrf_token %}
+      <div class="row g-4">
+
+        <!-- ── Delivery Details ──────────────────────────────── -->
+        <div class="col-lg-7">
+
+          <!-- Personal Info -->
+          <div class="checkout-card mb-4">
+            <div class="checkout-card-header">
+              <span class="step-num">1</span>
+              <h5 class="mb-0">Personal Information</h5>
+            </div>
+            <div class="checkout-card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                  <input type="text" name="full_name" class="form-control rounded-3"
+                         value="{{ user.get_full_name }}" placeholder="Your full name" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                  <input type="tel" name="phone" class="form-control rounded-3"
+                         placeholder="10-digit phone number" required />
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Email</label>
+                  <input type="email" name="email" class="form-control rounded-3"
+                         value="{{ user.email }}" placeholder="your@email.com" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Address -->
+          <div class="checkout-card mb-4">
+            <div class="checkout-card-header">
+              <span class="step-num">2</span>
+              <h5 class="mb-0">Delivery Address</h5>
+            </div>
+            <div class="checkout-card-body">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Street Address <span class="text-danger">*</span></label>
+                  <textarea name="address" class="form-control rounded-3" rows="2"
+                            placeholder="House no., Street, Area" required></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                  <input type="text" name="city" class="form-control rounded-3" placeholder="City" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                  <input type="text" name="state" class="form-control rounded-3" placeholder="State" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Pincode <span class="text-danger">*</span></label>
+                  <input type="text" name="pincode" class="form-control rounded-3" placeholder="6-digit" required />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="checkout-card mb-4">
+            <div class="checkout-card-header">
+              <span class="step-num">3</span>
+              <h5 class="mb-0">Payment Method</h5>
+            </div>
+            <div class="checkout-card-body">
+              <div class="row g-3">
+                <div class="col-6 col-md-3">
+                  <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cod" checked />
+                    <div class="payment-label">
+                      <i class="bi bi-cash-coin fs-4"></i>
+                      <span>Cash on Delivery</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="payment-option">
+                    <input type="radio" name="payment_method" value="upi" />
+                    <div class="payment-label">
+                      <i class="bi bi-phone fs-4"></i>
+                      <span>UPI</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="payment-option">
+                    <input type="radio" name="payment_method" value="card" />
+                    <div class="payment-label">
+                      <i class="bi bi-credit-card fs-4"></i>
+                      <span>Card</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="payment-option">
+                    <input type="radio" name="payment_method" value="online" />
+                    <div class="payment-label">
+                      <i class="bi bi-laptop fs-4"></i>
+                      <span>Net Banking</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Special Instructions -->
+          <div class="checkout-card">
+            <div class="checkout-card-header">
+              <span class="step-num">4</span>
+              <h5 class="mb-0">Special Instructions <span class="text-muted fw-normal fs-6">(Optional)</span></h5>
+            </div>
+            <div class="checkout-card-body">
+              <textarea name="special_instructions" class="form-control rounded-3" rows="3"
+                        placeholder="Any special requests? (e.g. No onions, extra spicy, ring the bell...)"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Order Summary ─────────────────────────────────── -->
+        <div class="col-lg-5">
+          <div class="order-summary-box sticky-top" style="top:80px;">
+            <h5 class="fw-bold mb-4 pb-2 border-bottom">🧾 Order Summary</h5>
+
+            <!-- Items List -->
+            <div class="checkout-items-list mb-3">
+              {% for item in cart_items %}
+              <div class="checkout-item-row">
+                <img src="{{ item.food_item.get_image }}" alt="{{ item.food_item.name }}" class="checkout-item-img"
+                     onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&q=80'" />
+                <div class="flex-grow-1">
+                  <p class="mb-0 fw-semibold small">{{ item.food_item.name }}</p>
+                  <small class="text-muted">Qty: {{ item.quantity }}</small>
+                </div>
+                <span class="fw-semibold small">₹{{ item.item_total }}</span>
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Totals -->
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span class="fw-semibold">₹{{ cart.subtotal }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Delivery</span>
+              <span>{% if cart.delivery_charge == 0 %}<span class="text-success fw-semibold">FREE</span>{% else %}₹{{ cart.delivery_charge }}{% endif %}</span>
+            </div>
+            <div class="summary-row total-row border-top pt-3 mt-2">
+              <span class="fw-bold fs-5">Total</span>
+              <span class="fw-bold fs-5 text-danger">₹{{ cart.grand_total }}</span>
+            </div>
+
+            <button type="submit" class="btn btn-danger btn-lg w-100 rounded-pill fw-semibold mt-4" id="placeOrderBtn">
+              <i class="bi bi-bag-check me-2"></i>Place Order
+            </button>
+
+            <div class="secure-badge text-center mt-3">
+              <i class="bi bi-shield-lock text-success me-1"></i>
+              <small class="text-muted">100% Secure & Encrypted</small>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', function () {
+  const btn = document.getElementById('placeOrderBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

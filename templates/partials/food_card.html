@@ -1,0 +1,68 @@
+<!-- ─── Food Card ─────────────────────────────────────────────────── -->
+<div class="food-card">
+  <!-- Badges -->
+  <div class="food-card-badges">
+    {% if food.is_bestseller %}<span class="badge-item bestseller">🔥 Bestseller</span>{% endif %}
+    {% if food.is_new %}<span class="badge-item new-item">✨ New</span>{% endif %}
+    {% if food.discount_percent > 0 %}<span class="badge-item discount">{{ food.discount_percent }}% OFF</span>{% endif %}
+  </div>
+
+  <!-- Veg/Non-Veg indicator -->
+  <div class="veg-indicator {{ food.is_veg|yesno:'veg,nonveg' }}">
+    {% if food.is_veg %}
+    <span title="Vegetarian">🟢</span>
+    {% else %}
+    <span title="Non-Vegetarian">🔴</span>
+    {% endif %}
+  </div>
+
+  <!-- Image -->
+  <a href="/menu/{{ food.slug }}/" class="food-card-img-link">
+    <div class="food-card-img-wrapper">
+      <img src="{{ food.get_image }}" alt="{{ food.name }}" class="food-card-img" loading="lazy"
+           onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80'" />
+      <div class="food-card-overlay">
+        <span class="quick-view-btn">Quick View</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Body -->
+  <div class="food-card-body">
+    <!-- Category -->
+    <span class="food-category">{{ food.category.name }}</span>
+
+    <!-- Name -->
+    <a href="/menu/{{ food.slug }}/" class="text-decoration-none">
+      <h5 class="food-name">{{ food.name }}</h5>
+    </a>
+
+    <!-- Description -->
+    <p class="food-desc">{{ food.short_description|default:food.description|truncatechars:60 }}</p>
+
+    <!-- Meta -->
+    <div class="food-meta d-flex gap-3">
+      <span class="meta-item"><i class="bi bi-star-fill text-warning"></i> {{ food.rating }}</span>
+      <span class="meta-item"><i class="bi bi-clock text-muted"></i> {{ food.prep_time }} min</span>
+    </div>
+
+    <!-- Price & Add to Cart -->
+    <div class="food-footer d-flex justify-content-between align-items-center mt-3">
+      <div class="price-group">
+        <span class="current-price">₹{{ food.display_price }}</span>
+        {% if food.discount_percent > 0 %}
+        <span class="original-price">₹{{ food.price }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Add to Cart Button -->
+      <form action="/orders/add/{{ food.id }}/" method="post" class="add-to-cart-form">
+        {% csrf_token %}
+        <button type="submit" class="btn-add-cart" data-food-id="{{ food.id }}" data-food-name="{{ food.name }}">
+          <i class="bi bi-plus-lg"></i>
+          <span>Add</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

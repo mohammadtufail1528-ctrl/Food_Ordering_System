@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Order Confirmed – Foodie{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+  <div class="container">
+    <div class="success-page text-center py-5">
+      <div class="success-animation">
+        <div class="success-circle">
+          <i class="bi bi-check-lg"></i>
+        </div>
+      </div>
+      <h2 class="mt-4 fw-bold">Order Placed Successfully! 🎉</h2>
+      <p class="text-muted fs-5">Your delicious food is being prepared</p>
+
+      <div class="order-success-card mx-auto mt-4">
+        <div class="row g-3 text-center">
+          <div class="col-4">
+            <p class="text-muted small mb-1">Order ID</p>
+            <strong class="text-danger">#{{ order.order_number }}</strong>
+          </div>
+          <div class="col-4">
+            <p class="text-muted small mb-1">Total</p>
+            <strong>₹{{ order.grand_total }}</strong>
+          </div>
+          <div class="col-4">
+            <p class="text-muted small mb-1">Status</p>
+            <span class="badge bg-{{ order.status_badge_class }}">{{ order.get_status_display }}</span>
+          </div>
+        </div>
+
+        <div class="delivery-timeline mt-4">
+          <div class="timeline-step active"><i class="bi bi-check-circle-fill"></i><span>Order Placed</span></div>
+          <div class="timeline-line {% if order.status != 'pending' %}active{% endif %}"></div>
+          <div class="timeline-step {% if order.status not in 'pending' %}active{% endif %}"><i class="bi bi-check-circle-fill"></i><span>Confirmed</span></div>
+          <div class="timeline-line"></div>
+          <div class="timeline-step"><i class="bi bi-circle"></i><span>Preparing</span></div>
+          <div class="timeline-line"></div>
+          <div class="timeline-step"><i class="bi bi-circle"></i><span>Delivered</span></div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+        <a href="/orders/detail/{{ order.order_number }}/" class="btn btn-danger rounded-pill px-5">View Order Details</a>
+        <a href="/menu/" class="btn btn-outline-danger rounded-pill px-5">Order More Food</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

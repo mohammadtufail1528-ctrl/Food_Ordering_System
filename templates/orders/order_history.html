@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}My Orders – Foodie{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+  <div class="container">
+    <div class="page-header-simple mb-5">
+      <h2 class="fw-bold">📦 My Orders</h2>
+      <p class="text-muted">Track and manage all your orders</p>
+    </div>
+
+    {% if orders %}
+    <div class="row g-4">
+      {% for order in orders %}
+      <div class="col-12">
+        <div class="order-history-card">
+          <!-- Header -->
+          <div class="order-history-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h6 class="fw-bold mb-0">Order #{{ order.order_number }}</h6>
+              <small class="text-muted">{{ order.created_at|date:"d M Y, h:i A" }}</small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-{{ order.status_badge_class }} rounded-pill px-3 py-2">
+                {{ order.get_status_display }}
+              </span>
+              <span class="fw-bold text-danger fs-5">₹{{ order.grand_total }}</span>
+            </div>
+          </div>
+
+          <!-- Items Preview -->
+          <div class="order-history-body">
+            <div class="d-flex gap-3 flex-wrap align-items-center">
+              {% for item in order.items.all|slice:":4" %}
+              <div class="order-item-chip">
+                <img src="{{ item.food_image }}" alt="{{ item.food_name }}"
+                     onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=60&q=80'" />
+                <span>{{ item.food_name|truncatechars:20 }} × {{ item.quantity }}</span>
+              </div>
+              {% endfor %}
+              {% if order.items.count > 4 %}
+              <span class="text-muted small">+{{ order.items.count|add:"-4" }} more items</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="order-history-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="text-muted small">
+              <i class="bi bi-geo-alt me-1"></i>{{ order.city }}, {{ order.state }}
+              &nbsp;•&nbsp;
+              <i class="bi bi-credit-card me-1"></i>{{ order.get_payment_method_display }}
+            </div>
+            <a href="/orders/detail/{{ order.order_number }}/" class="btn btn-outline-danger btn-sm rounded-pill px-4">
+              View Details <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state text-center py-5">
+      <div class="empty-icon">📦</div>
+      <h4>No orders yet</h4>
+      <p class="text-muted">You haven't placed any orders. Start exploring our menu!</p>
+      <a href="/menu/" class="btn btn-danger rounded-pill px-5 mt-2">Browse Menu</a>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
