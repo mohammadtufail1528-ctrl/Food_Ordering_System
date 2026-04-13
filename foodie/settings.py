@@ -9,8 +9,8 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY =  os.environ.get('SECRET_KEY')
-DEBUG = False
+SECRET_KEY =  'django-insecure-your-secret-key-here'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
